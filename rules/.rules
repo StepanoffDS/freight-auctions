@@ -1,0 +1,170 @@
+# Codex Project Rules
+
+## Source Of Truth
+
+- Treat `doc.md` and `openapi.auctions.v0.json` as required project inputs.
+- Treat `openapi.auctions.v0.json` as the source of truth for API contracts.
+- Do not invent request or response shapes when the OpenAPI schema defines them.
+- Preserve enum values, nullable fields, validation errors, and edge cases from the schema.
+- Do not implement a real backend. Use MSW mocks only.
+
+## Required Stack
+
+- Build the app with React, TypeScript, and Vite.
+- Use TanStack Router for routing.
+- Use TanStack Query for server state, loading states, mutations, cache invalidation, and prefetching.
+- Use React Hook Form with Zod for forms and validation.
+- Use MSW for API mocks.
+- Use Feature-Sliced Design for frontend structure.
+- Use MobX or Zustand only for focused client UI state. Do not duplicate server state in the UI store.
+
+## Architecture
+
+- Follow Feature-Sliced Design boundaries.
+- Keep business logic outside React components when it can be isolated as schemas, mappers, query builders, or model utilities.
+- Keep edits small and targeted.
+- Prefer simple, explicit code over broad abstractions.
+- Keep OpenAPI DTO types and UI view models separate when the UI needs derived fields.
+- Add reusable abstractions only when they remove real duplication or clarify domain logic.
+
+## File Naming
+
+- All React component files must use the `*.component.tsx` suffix.
+- Keep non-component React-related files named by purpose, for example `*.schema.ts`, `*.mapper.ts`, `*.query.ts`, `*.store.ts`, or `*.types.ts`.
+- Keep test files close to the logic they verify, following the project style.
+
+## API And MSW
+
+- Implement these endpoints from the OpenAPI schema:
+  - `POST /auctions/list`
+  - `GET /auctions/{auctionUuid}`
+  - `GET /auctions/{auctionUuid}/bets`
+  - `POST /auctions/{auctionUuid}/bets`
+- MSW handlers must match OpenAPI request and response contracts.
+- MSW state must update after successful bid mutations.
+- Bid mutation must update current auction price, user trading status, own bid state, and bets list.
+- Implement and surface `422 validation error` responses for invalid bid payloads.
+- Handle API errors explicitly in UI states.
+
+## Routing
+
+- Implement routes for:
+  - auctions list;
+  - auction detail;
+  - bid placement mode/page.
+- Bid placement must be reachable by link, not only by local modal state.
+- Keep route search params validated and safe.
+
+## Auctions List
+
+- Load the list with TanStack Query.
+- Implement pagination.
+- Implement skeleton, empty, and error states.
+- Prefetch auction detail data on user intent or hover.
+- Implement desktop and mobile layouts.
+- Synchronize filters through URL search params or localStorage.
+- Validate search params with Zod and provide safe fallback values.
+- Support at minimum these filters:
+  - `cargo_num`
+  - `status`
+  - `statuses`
+  - `auc_type`
+  - `load_city`
+  - `unload_city`
+  - load date from/to
+  - `is_available`
+  - `is_bidder`
+  - price from/to
+- Use a mock city dictionary for load and unload city filters.
+
+## Auction Card
+
+- Show request number.
+- Show auction type: `Request`, `Up`, `Down`, `FixPrice`.
+- Show auction status.
+- Show user trading status, for example `Leading`, `Losing`, `Winner`.
+- Show loading and unloading route.
+- Show load and unload dates.
+- Show cargo name, weight, volume, and body type.
+- Show current price, price per kilometer, and bid step.
+- Show whether the user already has a bid.
+- Show the correct primary action:
+  - "Make bid";
+  - "Change bid";
+  - "View bids";
+  - disabled state when no action is allowed.
+
+## Auction Detail
+
+- Load details through `GET /auctions/{auctionUuid}`.
+- Show main auction data.
+- Show organizer.
+- Show contacts only when they are not hidden.
+- Show the full route with all points.
+- Show cargo and vehicle requirements.
+- Show payment terms.
+- Show trading parameters.
+- Show current price, available price, min, max, and step when present.
+- Show own bid state.
+- Respect these DTO restrictions:
+  - `can_set_bet`
+  - `hide_bets_history`
+  - `hide_points_address_and_contacts`
+  - `no_view_cargo_price`
+
+## Bets
+
+- Load bets through `GET /auctions/{auctionUuid}/bets`.
+- Show bets list.
+- Show participants count.
+- Show price with VAT and without VAT.
+- Show carrier.
+- Show rating place.
+- Show winner flag.
+- Show cancelled bid flag.
+- Show cancellation reason when present.
+- Show empty state when there are no bets.
+- Show a dedicated hidden-history state when `hide_bets_history` is true.
+
+## Bid Form
+
+- Implement bid placement with React Hook Form and Zod.
+- Form availability must depend on `trading.can_set_bet`.
+- Price is required and must be greater than zero.
+- Respect min, max, and step from the detail DTO when present.
+- Show hints for available price and bid step.
+- Submit through `POST /auctions/{auctionUuid}/bets`.
+- After success, invalidate list, detail, and bets queries.
+- Show success and error toasts.
+- Handle and display `422 validation error`.
+
+## UI Quality
+
+- Keep the interface accurate, adaptive, and convenient to verify.
+- Implement meaningful loading, empty, error, disabled, and restricted-access states.
+- Avoid UI that hides required domain information.
+- Do not leak hidden contacts, addresses, bid history, or cargo price when DTO flags restrict them.
+
+## Documentation
+
+- Add `AI_USAGE.md`.
+- `AI_USAGE.md` must describe:
+  - which parts were built with AI;
+  - which decisions were made by the candidate;
+  - which AI suggestions were rejected;
+  - which parts were checked especially carefully;
+  - remaining risks;
+  - what would be improved with one more day.
+- Add or update `README` with local launch instructions.
+- `README` must describe checked scenarios, verification method, and remaining limitations.
+
+## Verification
+
+- The project must run locally.
+- Add minimal tests for pure logic where practical:
+  - search params parsing;
+  - request builder;
+  - ViewModel mappers;
+  - bid validation schema.
+- Before final response, run the most relevant available checks for the touched code.
+- If checks cannot be run, state the reason and the remaining risk.

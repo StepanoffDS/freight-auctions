@@ -1,0 +1,1384 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Cargo Auctions API",
+    "description": "API for browsing cargo auctions, reading auction details and bets history, and placing a carrier bet.",
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "https://api.example.local",
+      "description": "Mock-compatible API base URL"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auctions",
+      "description": "Cargo auction operations"
+    },
+    {
+      "name": "Bets",
+      "description": "Auction bets operations"
+    }
+  ],
+  "paths": {
+    "/auctions/list": {
+      "post": {
+        "tags": [
+          "Auctions"
+        ],
+        "summary": "Get auctions list",
+        "operationId": "postAuctionsList",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuctionsListRequest"
+              },
+              "examples": {
+                "default": {
+                  "value": {
+                    "page": 1,
+                    "per_page": 10,
+                    "filters": {
+                      "statuses": [
+                        "Trading"
+                      ],
+                      "load_city_uuid": "4f64677b-4493-4c41-a326-020768df1a1b",
+                      "is_available": true
+                    },
+                    "sort": {
+                      "field": "loading_date",
+                      "direction": "asc"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Auctions list with pagination metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuctionsListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/auctions/{auctionUuid}": {
+      "get": {
+        "tags": [
+          "Auctions"
+        ],
+        "summary": "Get auction details",
+        "operationId": "getAuctionByUuid",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuctionUuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Auction detail DTO.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuctionDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/auctions/{auctionUuid}/bets": {
+      "get": {
+        "tags": [
+          "Bets"
+        ],
+        "summary": "Get auction bets history",
+        "operationId": "getAuctionBets",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuctionUuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bets history. If history is hidden, `is_hidden` is true and `items` is empty.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuctionBetsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Bets"
+        ],
+        "summary": "Set or update current carrier bet",
+        "operationId": "postAuctionBet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuctionUuid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetBetRequest"
+              },
+              "examples": {
+                "default": {
+                  "value": {
+                    "price": 108000,
+                    "comment": "Ready to load today"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bet was accepted and auction state was recalculated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetBetResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "AuctionUuid": {
+        "name": "auctionUuid",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "example": "6bf9f6e6-c37f-4309-a132-f40ec1a79f09"
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Malformed request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Action is not available for the current user.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "code": "BET_FORBIDDEN",
+              "message": "Bet cannot be set for this auction."
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Auction was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "code": "AUCTION_NOT_FOUND",
+              "message": "Auction was not found."
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Auction state changed and request cannot be applied.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "code": "AUCTION_STATE_CHANGED",
+              "message": "Auction is no longer accepting bets."
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Validation error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationErrorResponse"
+            },
+            "example": {
+              "code": "VALIDATION_ERROR",
+              "message": "Request validation failed.",
+              "errors": [
+                {
+                  "field": "price",
+                  "message": "Price must match auction step."
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "AuctionsListRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "page",
+          "per_page"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "per_page": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 10
+          },
+          "filters": {
+            "$ref": "#/components/schemas/AuctionsListFilters"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/AuctionsListSort"
+          }
+        }
+      },
+      "AuctionsListFilters": {
+        "type": "object",
+        "nullable": true,
+        "additionalProperties": false,
+        "properties": {
+          "cargo_num": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Cargo request number substring."
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuctionStatus"
+              }
+            ],
+            "nullable": true,
+            "deprecated": true,
+            "description": "Single status filter. Prefer `statuses`."
+          },
+          "statuses": {
+            "type": "array",
+            "nullable": true,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/AuctionStatus"
+            }
+          },
+          "auc_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuctionType"
+              }
+            ],
+            "nullable": true
+          },
+          "load_city_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "unload_city_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "loading_date_from": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "loading_date_to": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "is_available": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Only auctions where current user can set a bet."
+          },
+          "is_bidder": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Only auctions where current user already has a bet."
+          },
+          "price_from": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "nullable": true
+          },
+          "price_to": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "nullable": true
+          }
+        }
+      },
+      "AuctionsListSort": {
+        "type": "object",
+        "nullable": true,
+        "additionalProperties": false,
+        "required": [
+          "field",
+          "direction"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "created_at",
+              "loading_date",
+              "current_price",
+              "cargo_num"
+            ]
+          },
+          "direction": {
+            "$ref": "#/components/schemas/SortDirection"
+          }
+        }
+      },
+      "AuctionsListResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuctionListItem"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "AuctionListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "auction_uuid",
+          "cargo_num",
+          "auc_type",
+          "status",
+          "user_trading_status",
+          "route",
+          "loading_date",
+          "unloading_date",
+          "cargo",
+          "price",
+          "trading",
+          "has_my_bet",
+          "created_at"
+        ],
+        "properties": {
+          "auction_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cargo_num": {
+            "type": "string",
+            "example": "UL-2026-000148"
+          },
+          "auc_type": {
+            "$ref": "#/components/schemas/AuctionType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AuctionStatus"
+          },
+          "user_trading_status": {
+            "$ref": "#/components/schemas/UserTradingStatus"
+          },
+          "route": {
+            "$ref": "#/components/schemas/RouteSummary"
+          },
+          "loading_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "unloading_date": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "cargo": {
+            "$ref": "#/components/schemas/CargoSummary"
+          },
+          "price": {
+            "$ref": "#/components/schemas/AuctionPriceSummary"
+          },
+          "trading": {
+            "$ref": "#/components/schemas/AuctionTradingSummary"
+          },
+          "has_my_bet": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AuctionDetail": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "auction_uuid",
+          "cargo_num",
+          "auc_type",
+          "status",
+          "user_trading_status",
+          "organizer",
+          "contacts",
+          "route",
+          "cargo",
+          "vehicle_requirements",
+          "payment",
+          "price",
+          "trading",
+          "my_bet",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "auction_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cargo_num": {
+            "type": "string"
+          },
+          "auc_type": {
+            "$ref": "#/components/schemas/AuctionType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AuctionStatus"
+          },
+          "user_trading_status": {
+            "$ref": "#/components/schemas/UserTradingStatus"
+          },
+          "organizer": {
+            "$ref": "#/components/schemas/Organizer"
+          },
+          "contacts": {
+            "$ref": "#/components/schemas/AuctionContacts"
+          },
+          "route": {
+            "$ref": "#/components/schemas/RouteDetail"
+          },
+          "cargo": {
+            "$ref": "#/components/schemas/CargoDetail"
+          },
+          "vehicle_requirements": {
+            "$ref": "#/components/schemas/VehicleRequirements"
+          },
+          "payment": {
+            "$ref": "#/components/schemas/PaymentTerms"
+          },
+          "price": {
+            "$ref": "#/components/schemas/AuctionPriceDetail"
+          },
+          "trading": {
+            "$ref": "#/components/schemas/AuctionTradingDetail"
+          },
+          "my_bet": {
+            "$ref": "#/components/schemas/MyBet"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AuctionBetsResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "auction_uuid",
+          "is_hidden",
+          "participants_count",
+          "items"
+        ],
+        "properties": {
+          "auction_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_hidden": {
+            "type": "boolean",
+            "description": "If true, bets history must not be shown to the user."
+          },
+          "participants_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bet"
+            }
+          }
+        }
+      },
+      "SetBetRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "price"
+        ],
+        "properties": {
+          "price": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "description": "Bet price with VAT in auction currency."
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500
+          }
+        }
+      },
+      "SetBetResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "auction",
+          "bet"
+        ],
+        "properties": {
+          "auction": {
+            "$ref": "#/components/schemas/AuctionDetail"
+          },
+          "bet": {
+            "$ref": "#/components/schemas/Bet"
+          }
+        }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "page",
+          "per_page",
+          "total",
+          "pages"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "per_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "RouteSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "load_city",
+          "unload_city",
+          "distance_km"
+        ],
+        "properties": {
+          "load_city": {
+            "$ref": "#/components/schemas/City"
+          },
+          "unload_city": {
+            "$ref": "#/components/schemas/City"
+          },
+          "distance_km": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "nullable": true
+          }
+        }
+      },
+      "RouteDetail": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "points",
+          "distance_km"
+        ],
+        "properties": {
+          "points": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/components/schemas/RoutePoint"
+            }
+          },
+          "distance_km": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "nullable": true
+          }
+        }
+      },
+      "RoutePoint": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "point_uuid",
+          "type",
+          "sequence",
+          "city",
+          "address",
+          "date_from",
+          "date_to",
+          "contacts"
+        ],
+        "properties": {
+          "point_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/RoutePointType"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "city": {
+            "$ref": "#/components/schemas/City"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true,
+            "description": "Null when `hide_points_address_and_contacts` is true."
+          },
+          "date_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "date_to": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "contacts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Contact"
+            },
+            "description": "Empty when `hide_points_address_and_contacts` is true."
+          }
+        }
+      },
+      "City": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "uuid",
+          "name",
+          "region"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CargoSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "weight_tons",
+          "volume_m3",
+          "body_type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "weight_tons": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "nullable": true
+          },
+          "volume_m3": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "nullable": true
+          },
+          "body_type": {
+            "$ref": "#/components/schemas/BodyType"
+          }
+        }
+      },
+      "CargoDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CargoSummary"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "cargo_uuid",
+              "packaging",
+              "places_count",
+              "temperature_from",
+              "temperature_to",
+              "is_hazardous"
+            ],
+            "properties": {
+              "cargo_uuid": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "packaging": {
+                "type": "string",
+                "nullable": true
+              },
+              "places_count": {
+                "type": "integer",
+                "minimum": 0,
+                "nullable": true
+              },
+              "temperature_from": {
+                "type": "number",
+                "format": "double",
+                "nullable": true
+              },
+              "temperature_to": {
+                "type": "number",
+                "format": "double",
+                "nullable": true
+              },
+              "is_hazardous": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "VehicleRequirements": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "body_type",
+          "loading_type",
+          "vehicle_count",
+          "extra_requirements"
+        ],
+        "properties": {
+          "body_type": {
+            "$ref": "#/components/schemas/BodyType"
+          },
+          "loading_type": {
+            "type": "string",
+            "nullable": true,
+            "example": "side"
+          },
+          "vehicle_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "extra_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PaymentTerms": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "delay_days",
+          "note"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Prepayment",
+              "OnUnload",
+              "Deferred"
+            ]
+          },
+          "delay_days": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AuctionPriceSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "currency",
+          "current_price",
+          "price_per_km",
+          "bet_step"
+        ],
+        "properties": {
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "current_price": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "nullable": true,
+            "description": "Null when `no_view_cargo_price` is true."
+          },
+          "price_per_km": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "nullable": true
+          },
+          "bet_step": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "nullable": true
+          }
+        }
+      },
+      "AuctionPriceDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuctionPriceSummary"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "available_price",
+              "min_bet_price",
+              "max_bet_price",
+              "start_price",
+              "with_vat"
+            ],
+            "properties": {
+              "available_price": {
+                "type": "number",
+                "format": "double",
+                "minimum": 0,
+                "nullable": true,
+                "description": "Recommended next valid bet price."
+              },
+              "min_bet_price": {
+                "type": "number",
+                "format": "double",
+                "minimum": 0,
+                "nullable": true
+              },
+              "max_bet_price": {
+                "type": "number",
+                "format": "double",
+                "minimum": 0,
+                "nullable": true
+              },
+              "start_price": {
+                "type": "number",
+                "format": "double",
+                "minimum": 0,
+                "nullable": true
+              },
+              "with_vat": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "AuctionTradingSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "can_set_bet",
+          "hide_bets_history",
+          "hide_points_address_and_contacts",
+          "no_view_cargo_price"
+        ],
+        "properties": {
+          "can_set_bet": {
+            "type": "boolean"
+          },
+          "hide_bets_history": {
+            "type": "boolean"
+          },
+          "hide_points_address_and_contacts": {
+            "type": "boolean"
+          },
+          "no_view_cargo_price": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AuctionTradingDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuctionTradingSummary"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "starts_at",
+              "ends_at",
+              "server_time"
+            ],
+            "properties": {
+              "starts_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "ends_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "server_time": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        ]
+      },
+      "Organizer": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "uuid",
+          "name",
+          "inn"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "inn": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AuctionContacts": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "is_hidden",
+          "items"
+        ],
+        "properties": {
+          "is_hidden": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Contact"
+            }
+          }
+        }
+      },
+      "Contact": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "phone",
+          "email"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          }
+        }
+      },
+      "MyBet": {
+        "type": "object",
+        "nullable": true,
+        "additionalProperties": false,
+        "required": [
+          "bet_uuid",
+          "price",
+          "price_without_vat",
+          "status",
+          "ranking_place",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "bet_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "price": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0
+          },
+          "price_without_vat": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/BetStatus"
+          },
+          "ranking_place": {
+            "type": "integer",
+            "minimum": 1,
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "Bet": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "bet_uuid",
+          "carrier",
+          "price",
+          "price_without_vat",
+          "status",
+          "ranking_place",
+          "is_winner",
+          "is_canceled",
+          "cancel_reason",
+          "created_at"
+        ],
+        "properties": {
+          "bet_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "carrier": {
+            "$ref": "#/components/schemas/Carrier"
+          },
+          "price": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0
+          },
+          "price_without_vat": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/BetStatus"
+          },
+          "ranking_place": {
+            "type": "integer",
+            "minimum": 1,
+            "nullable": true
+          },
+          "is_winner": {
+            "type": "boolean"
+          },
+          "is_canceled": {
+            "type": "boolean"
+          },
+          "cancel_reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Carrier": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "uuid",
+          "name",
+          "is_current_user"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_current_user": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationErrorResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ErrorResponse"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "errors"
+            ],
+            "properties": {
+              "errors": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ValidationErrorItem"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ValidationErrorItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "field",
+          "message"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "example": "filters.price_from"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "AuctionType": {
+        "type": "string",
+        "enum": [
+          "Request",
+          "Up",
+          "Down",
+          "FixPrice"
+        ]
+      },
+      "AuctionStatus": {
+        "type": "string",
+        "enum": [
+          "Draft",
+          "Published",
+          "Trading",
+          "Finished",
+          "Canceled",
+          "Archived"
+        ]
+      },
+      "UserTradingStatus": {
+        "type": "string",
+        "nullable": true,
+        "enum": [
+          "NotParticipant",
+          "Leading",
+          "Losing",
+          "Winner",
+          "Lost",
+          "Canceled"
+        ]
+      },
+      "BetStatus": {
+        "type": "string",
+        "enum": [
+          "Active",
+          "Outbid",
+          "Winner",
+          "Canceled",
+          "Rejected"
+        ]
+      },
+      "RoutePointType": {
+        "type": "string",
+        "enum": [
+          "Load",
+          "Unload"
+        ]
+      },
+      "BodyType": {
+        "type": "string",
+        "enum": [
+          "Tent",
+          "Refrigerator",
+          "Isothermal",
+          "Container",
+          "Flatbed",
+          "Any"
+        ]
+      },
+      "Currency": {
+        "type": "string",
+        "enum": [
+          "RUB"
+        ]
+      },
+      "SortDirection": {
+        "type": "string",
+        "enum": [
+          "asc",
+          "desc"
+        ]
+      }
+    }
+  }
+}
