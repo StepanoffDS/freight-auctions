@@ -11,7 +11,8 @@ import type { AuctionDetailDto } from '@/shared/api/auctions';
 import { Badge } from '@/shared/ui/kit/badge';
 import { ParamField } from '@/shared/ui/ParamField.component';
 
-import { PrimaryAction, Section } from '../ui-kit.component';
+import { PrimaryAction } from '../primary-action.component';
+import { Section } from '../ui-kit.component';
 
 export function AuctionSummarySection({
   auction,

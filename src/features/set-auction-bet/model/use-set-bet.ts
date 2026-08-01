@@ -12,9 +12,9 @@ import {
 import {
   applyValidationError,
   type BetFormValues,
-  buildBetSchema,
   getErrorMessage,
 } from './bet-form';
+import { buildBetSchema } from './bet-schema';
 
 export function useSetBet({
   auction,
@@ -47,7 +47,7 @@ export function useSetBet({
     form.clearErrors();
 
     const parsed = buildBetSchema(auction).safeParse(values);
-    console.log('parsed', parsed);
+
     if (!parsed.success) {
       parsed.error.issues.forEach((issue) => {
         if (issue.path[0] === 'price') {
