@@ -1,4 +1,4 @@
-import { HttpResponse, http } from 'msw';
+import { HttpResponse, delay, http } from 'msw';
 
 import { CONFIG } from '../../../model/config';
 import type { ApiSchemas } from '../../schema';
@@ -9,10 +9,15 @@ const apiUrl = (path: string) => `${CONFIG.API_BASE_URL}${path}`;
 export const auctionHandlers = [
   http.post(apiUrl('/auctions/list'), async ({ request }) => {
     const body = (await request.json()) as ApiSchemas['AuctionsListRequest'];
+
+    await delay(1000);
+
     return HttpResponse.json(auctionMockStore.list(body));
   }),
 
-  http.get(apiUrl('/auctions/:auctionUuid'), ({ params }) => {
+  http.get(apiUrl('/auctions/:auctionUuid'), async ({ params }) => {
+    await delay(1000);
+
     const auction = auctionMockStore.detail(String(params.auctionUuid));
 
     if (!auction) {
@@ -25,7 +30,9 @@ export const auctionHandlers = [
     return HttpResponse.json(auction);
   }),
 
-  http.get(apiUrl('/auctions/:auctionUuid/bets'), ({ params }) => {
+  http.get(apiUrl('/auctions/:auctionUuid/bets'), async ({ params }) => {
+    await delay(1000);
+
     const response = auctionMockStore.bets(String(params.auctionUuid));
 
     if (!response) {
@@ -38,12 +45,17 @@ export const auctionHandlers = [
     return HttpResponse.json(response);
   }),
 
-  http.post(apiUrl('/auctions/:auctionUuid/bets'), async ({ params, request }) => {
-    const result = auctionMockStore.setBet(
-      String(params.auctionUuid),
-      (await request.json()) as ApiSchemas['SetBetRequest'],
-    );
+  http.post(
+    apiUrl('/auctions/:auctionUuid/bets'),
+    async ({ params, request }) => {
+      const result = auctionMockStore.setBet(
+        String(params.auctionUuid),
+        (await request.json()) as ApiSchemas['SetBetRequest'],
+      );
 
-    return HttpResponse.json(result.body, { status: result.status });
-  }),
+      await delay(1000);
+
+      return HttpResponse.json(result.body, { status: result.status });
+    },
+  ),
 ];

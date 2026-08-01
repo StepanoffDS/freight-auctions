@@ -1,4 +1,5 @@
 import type { ApiSchemas } from '../schema';
+import { MOCK_CITIES } from '../../model/mock-cities';
 
 type AuctionDetail = ApiSchemas['AuctionDetail'];
 type AuctionListItem = ApiSchemas['AuctionListItem'];
@@ -29,37 +30,14 @@ const carriers: Carrier[] = [
   },
 ];
 
-export const mockCities: City[] = [
-  {
-    uuid: '00000000-0000-4000-8000-000000000201',
-    name: 'Самара',
-    region: 'Самарская область',
-  },
-  {
-    uuid: '00000000-0000-4000-8000-000000000202',
-    name: 'Москва',
-    region: 'Москва',
-  },
-  {
-    uuid: '00000000-0000-4000-8000-000000000203',
-    name: 'Казань',
-    region: 'Республика Татарстан',
-  },
-  {
-    uuid: '00000000-0000-4000-8000-000000000204',
-    name: 'Екатеринбург',
-    region: 'Свердловская область',
-  },
-];
-
 const auctions: AuctionDetail[] = [
   makeAuction({
     uuid: '00000000-0000-4000-8000-000000000301',
     cargoNum: 'UL-2026-000148',
     type: 'Down',
     status: 'Trading',
-    loadCity: mockCities[0],
-    unloadCity: mockCities[1],
+    loadCity: MOCK_CITIES[0],
+    unloadCity: MOCK_CITIES[1],
     cargoName: 'Молочная продукция',
     currentPrice: 120000,
     minBetPrice: 90000,
@@ -72,8 +50,8 @@ const auctions: AuctionDetail[] = [
     cargoNum: 'UL-2026-000219',
     type: 'Request',
     status: 'Trading',
-    loadCity: mockCities[2],
-    unloadCity: mockCities[3],
+    loadCity: MOCK_CITIES[2],
+    unloadCity: MOCK_CITIES[3],
     cargoName: 'Стройматериалы',
     currentPrice: 104000,
     minBetPrice: 80000,
@@ -87,8 +65,8 @@ const auctions: AuctionDetail[] = [
     cargoNum: 'UL-2026-000301',
     type: 'FixPrice',
     status: 'Finished',
-    loadCity: mockCities[1],
-    unloadCity: mockCities[0],
+    loadCity: MOCK_CITIES[1],
+    unloadCity: MOCK_CITIES[0],
     cargoName: 'Бытовая техника',
     currentPrice: 95000,
     minBetPrice: 95000,
@@ -104,8 +82,8 @@ const auctions: AuctionDetail[] = [
     cargoNum: 'UL-2026-000417',
     type: 'Up',
     status: 'Canceled',
-    loadCity: mockCities[3],
-    unloadCity: mockCities[2],
+    loadCity: MOCK_CITIES[3],
+    unloadCity: MOCK_CITIES[2],
     cargoName: 'Металлопрокат',
     currentPrice: null,
     minBetPrice: null,

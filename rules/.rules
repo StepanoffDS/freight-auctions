@@ -168,3 +168,6 @@
   - bid validation schema.
 - Before final response, run the most relevant available checks for the touched code.
 - If checks cannot be run, state the reason and the remaining risk.
+
+
+- Use yarn as the package manager.

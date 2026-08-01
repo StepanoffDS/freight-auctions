@@ -1,18 +1,11 @@
 import { z } from 'zod';
 
+import { AUCTION_STATUSES } from '@/entities/auction';
 import type { AuctionsListRequestDto } from '@/shared/api';
 import { DEFAULT_AUCTIONS_SEARCH } from '@/shared/model/auctions';
 
-const AUCTION_STATUSES = [
-  'Draft',
-  'Published',
-  'Trading',
-  'Finished',
-  'Canceled',
-  'Archived',
-] as const;
+export const AUCTION_TYPES = ['Request', 'Up', 'Down', 'FixPrice'] as const;
 
-const AUCTION_TYPES = ['Request', 'Up', 'Down', 'FixPrice'] as const;
 const SORT_FIELDS = [
   'created_at',
   'loading_date',
@@ -49,20 +42,17 @@ const optionalNumberSchema = z.coerce
   .catch(undefined);
 
 const statusesSchema = z
-  .preprocess(
-    (value) => {
-      if (Array.isArray(value)) {
-        return value;
-      }
+  .preprocess((value) => {
+    if (Array.isArray(value)) {
+      return value;
+    }
 
-      if (typeof value === 'string' && value.length > 0) {
-        return value.split(',');
-      }
+    if (typeof value === 'string' && value.length > 0) {
+      return value.split(',');
+    }
 
-      return [];
-    },
-    z.array(z.enum(AUCTION_STATUSES)),
-  )
+    return [];
+  }, z.array(z.enum(AUCTION_STATUSES)))
   .catch([]);
 
 export const auctionsSearchSchema = z.object({

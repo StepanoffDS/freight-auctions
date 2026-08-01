@@ -5,11 +5,11 @@ import { AuctionDetailPage } from '@/pages/auction-detail';
 import {
   AuctionsListPage,
   auctionsSearchSchema,
-  buildAuctionsListRequest,
 } from '@/pages/auctions';
 import { auctionQueries, queryClient } from '@/shared/api';
 import { DEFAULT_AUCTIONS_SEARCH } from '@/shared/model/auctions';
 import { ROUTES } from '@/shared/model/routes';
+
 import { RootLayout, RootNotFound } from '../layouts/root-layout.component';
 
 export const rootRoute = createRootRoute({
@@ -29,11 +29,6 @@ export const auctionsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'auctions',
   validateSearch: (search) => auctionsSearchSchema.parse(search),
-  loaderDeps: ({ search }) => ({
-    request: buildAuctionsListRequest(search),
-  }),
-  loader: ({ deps }) =>
-    queryClient.ensureQueryData(auctionQueries.list(deps.request)),
   component: AuctionsListPage,
 });
 
