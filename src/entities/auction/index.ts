@@ -4,5 +4,6 @@ export {
   AUCTION_STATUSES,
   AUCTION_TYPE_LABEL,
   type AuctionStatus,
+  BET_STATUS_LABEL,
 } from './model/status';
 export { AuctionCard } from './ui/auction-card.component';

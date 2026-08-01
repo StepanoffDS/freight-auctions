@@ -4,22 +4,14 @@ import {
   formatMoney,
   formatNumber,
 } from '@/entities/auction/lib/format';
-import { USER_TRADING_STATUS_LABEL } from '@/entities/auction/model/status';
+import {
+  BET_STATUS_LABEL,
+  USER_TRADING_STATUS_LABEL,
+} from '@/entities/auction/model/status';
 import type { AuctionDetailDto } from '@/shared/api/auctions';
 import { Badge } from '@/shared/ui/kit/badge';
 
 import { Field, PrimaryAction, Section } from '../ui-kit.component';
-
-const BET_STATUS_LABEL: Record<
-  NonNullable<AuctionDetailDto['my_bet']>['status'],
-  string
-> = {
-  Active: 'активна',
-  Canceled: 'отменена',
-  Outbid: 'перебита',
-  Rejected: 'отклонена',
-  Winner: 'победила',
-};
 
 export function AuctionSummarySection({
   auction,

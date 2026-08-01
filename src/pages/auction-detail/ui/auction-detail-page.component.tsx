@@ -5,6 +5,7 @@ import { auctionQueries } from '@/shared/api';
 import { DEFAULT_AUCTIONS_SEARCH } from '@/shared/model/auctions';
 import { ROUTES } from '@/shared/model/routes';
 
+import { AuctionBetsSection } from './sections/auction-bets-section.component';
 import { AuctionCargoSection } from './sections/auction-cargo-section.component';
 import { AuctionContactsSection } from './sections/auction-contacts-section.component';
 import { AuctionPaymentSection } from './sections/auction-payment-section.component';
@@ -52,6 +53,8 @@ export function AuctionDetailPage() {
         <AuctionPriceSection auction={data} />
 
         <AuctionRestrictionsSection auction={data} />
+
+        <AuctionBetsSection auction={data} />
 
         <AuctionRouteSection auction={data} />
 

@@ -1,4 +1,7 @@
-import type { AuctionListItemDto } from '@/shared/api/auctions';
+import type {
+  AuctionBetsResponseDto,
+  AuctionListItemDto,
+} from '@/shared/api/auctions';
 
 export const AUCTION_STATUSES = [
   'Draft',
@@ -40,4 +43,15 @@ export const USER_TRADING_STATUS_LABEL: Record<
   Winner: 'Победитель',
   Lost: 'Проиграл',
   Canceled: 'Отменен',
+} as const;
+
+export const BET_STATUS_LABEL: Record<
+  AuctionBetsResponseDto['items'][number]['status'],
+  string
+> = {
+  Active: 'Активна',
+  Canceled: 'Отменена',
+  Outbid: 'Перебита',
+  Rejected: 'Отклонена',
+  Winner: 'Победила',
 } as const;
