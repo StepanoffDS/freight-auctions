@@ -18,7 +18,7 @@ export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   Finished: 'Завершен',
   Canceled: 'Отменен',
   Archived: 'Архив',
-};
+} as const;
 
 export const AUCTION_TYPE_LABEL: Record<
   AuctionListItemDto['auc_type'],
@@ -28,7 +28,7 @@ export const AUCTION_TYPE_LABEL: Record<
   Up: 'На повышение',
   Down: 'На понижение',
   FixPrice: 'Фиксированная цена',
-};
+} as const;
 
 export const USER_TRADING_STATUS_LABEL: Record<
   NonNullable<AuctionListItemDto['user_trading_status']>,
@@ -40,4 +40,4 @@ export const USER_TRADING_STATUS_LABEL: Record<
   Winner: 'Победитель',
   Lost: 'Проиграл',
   Canceled: 'Отменен',
-};
+} as const;

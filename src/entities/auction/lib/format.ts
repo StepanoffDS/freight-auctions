@@ -1,4 +1,4 @@
-export function formatDate(value: string | null) {
+export function formatAuctionDate(value: string | null) {
   return value ? new Intl.DateTimeFormat('ru-RU').format(new Date(value)) : '-';
 }
 

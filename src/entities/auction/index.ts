@@ -1,3 +1,4 @@
+export { formatAuctionDate } from './lib/format';
 export {
   AUCTION_STATUS_LABEL,
   AUCTION_STATUSES,

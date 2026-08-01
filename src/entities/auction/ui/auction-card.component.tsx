@@ -5,9 +5,10 @@ import type { ReactNode } from 'react';
 import type { AuctionListItemDto } from '@/shared/api';
 import { cn } from '@/shared/lib/css';
 import { ROUTES } from '@/shared/model/routes';
+import { Badge } from '@/shared/ui/kit/badge';
 import { Button } from '@/shared/ui/kit/button';
 
-import { formatDate, formatMoney, formatNumber } from '../lib/format';
+import { formatAuctionDate, formatMoney, formatNumber } from '../lib/format';
 import {
   AUCTION_STATUS_LABEL,
   AUCTION_TYPE_LABEL,
@@ -41,9 +42,13 @@ export function AuctionCard({ auction, onPrefetch }: AuctionCardProps) {
             {auction.cargo_num}
           </Link>
           <div className='mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground'>
-            <Badge>{AUCTION_TYPE_LABEL[auction.auc_type]}</Badge>
-            <Badge>{AUCTION_STATUS_LABEL[auction.status]}</Badge>
-            <Badge>{userStatus}</Badge>
+            <Badge variant='secondary'>
+              {AUCTION_TYPE_LABEL[auction.auc_type]}
+            </Badge>
+            <Badge variant='secondary'>
+              {AUCTION_STATUS_LABEL[auction.status]}
+            </Badge>
+            <Badge variant='secondary'>{userStatus}</Badge>
           </div>
         </div>
 
@@ -79,7 +84,7 @@ export function AuctionCard({ auction, onPrefetch }: AuctionCardProps) {
         />
         <Field
           label='Даты'
-          value={`${formatDate(auction.loading_date)} - ${formatDate(
+          value={`${formatAuctionDate(auction.loading_date)} - ${formatAuctionDate(
             auction.unloading_date,
           )}`}
         />
@@ -128,14 +133,6 @@ export function AuctionCard({ auction, onPrefetch }: AuctionCardProps) {
         />
       </div>
     </article>
-  );
-}
-
-function Badge({ children }: { children: string }) {
-  return (
-    <span className='rounded-md border bg-muted px-2 py-1 leading-none'>
-      {children}
-    </span>
   );
 }
 
