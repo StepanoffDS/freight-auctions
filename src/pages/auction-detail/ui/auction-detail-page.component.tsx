@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
 
 import { auctionQueries } from '@/shared/api';
 import { DEFAULT_AUCTIONS_SEARCH } from '@/shared/model/auctions';
@@ -13,7 +14,6 @@ import { AuctionPriceSection } from './sections/auction-price-section.component'
 import { AuctionRestrictionsSection } from './sections/auction-restrictions-section.component';
 import { AuctionRouteSection } from './sections/auction-route-section.component';
 import { AuctionSummarySection } from './sections/auction-summary-section.component';
-import { AuctionDetailLayout } from './ui-kit.component';
 
 export function AuctionDetailPage() {
   const { auctionUuid } = useParams({ strict: false }) as {
@@ -73,5 +73,20 @@ export function AuctionDetailPage() {
         </Link>
       </div>
     </AuctionDetailLayout>
+  );
+}
+
+function AuctionDetailLayout({
+  children,
+  title,
+}: {
+  children: ReactNode;
+  title: string;
+}) {
+  return (
+    <section className='mx-auto max-w-6xl px-4 py-8'>
+      <h1 className='mb-6 text-2xl font-semibold'>{title}</h1>
+      {children}
+    </section>
   );
 }
