@@ -1,12 +1,12 @@
 import { Link } from '@tanstack/react-router';
 import { CheckIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
 
 import type { AuctionListItemDto } from '@/shared/api';
 import { cn } from '@/shared/lib/css';
 import { ROUTES } from '@/shared/model/routes';
 import { Badge } from '@/shared/ui/kit/badge';
 import { Button } from '@/shared/ui/kit/button';
+import { ParamField } from '@/shared/ui/ParamField.component';
 
 import { formatAuctionDate, formatMoney, formatNumber } from '../lib/format';
 import {
@@ -20,6 +20,7 @@ type AuctionCardProps = {
   onPrefetch?: (auctionUuid: string) => void;
 };
 
+// TODO: refactor
 export function AuctionCard({ auction, onPrefetch }: AuctionCardProps) {
   const action = getPrimaryAction(auction);
   const userStatus = auction.user_trading_status
@@ -78,17 +79,17 @@ export function AuctionCard({ auction, onPrefetch }: AuctionCardProps) {
       </div>
 
       <div className='grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4'>
-        <Field
+        <ParamField
           label='Маршрут'
           value={`${auction.route.load_city.name} -> ${auction.route.unload_city.name}`}
         />
-        <Field
+        <ParamField
           label='Даты'
           value={`${formatAuctionDate(auction.loading_date)} - ${formatAuctionDate(
             auction.unloading_date,
           )}`}
         />
-        <Field
+        <ParamField
           label='Груз'
           value={`${auction.cargo.name}, ${formatNumber(
             auction.cargo.weight_tons,
@@ -97,7 +98,7 @@ export function AuctionCard({ auction, onPrefetch }: AuctionCardProps) {
             auction.cargo.body_type
           }`}
         />
-        <Field
+        <ParamField
           label='Ставка'
           value={
             auction.has_my_bet ? (
@@ -113,37 +114,26 @@ export function AuctionCard({ auction, onPrefetch }: AuctionCardProps) {
       </div>
 
       <div className='grid gap-3 border-t pt-4 text-sm sm:grid-cols-3'>
-        <Field
+        <ParamField
           label='Текущая цена'
           value={formatMoney(
             auction.price.current_price,
             auction.price.currency,
           )}
         />
-        <Field
+        <ParamField
           label='Цена за км'
           value={formatMoney(
             auction.price.price_per_km,
             auction.price.currency,
           )}
         />
-        <Field
+        <ParamField
           label='Шаг ставки'
           value={formatMoney(auction.price.bet_step, auction.price.currency)}
         />
       </div>
     </article>
-  );
-}
-
-function Field({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className='min-w-0'>
-      <div className='text-xs font-medium uppercase text-muted-foreground'>
-        {label}
-      </div>
-      <div className='mt-1 break-words'>{value}</div>
-    </div>
   );
 }
 

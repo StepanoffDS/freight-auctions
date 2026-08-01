@@ -3,6 +3,7 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
 import { DEFAULT_AUCTIONS_SEARCH } from '@/shared/model/auctions';
 import { ROUTES } from '@/shared/model/routes';
+import { Toaster } from '@/shared/ui/kit/sonner';
 
 export function RootLayout() {
   return (
@@ -20,6 +21,7 @@ export function RootLayout() {
         </nav>
       </header>
       <Outlet />
+      <Toaster />
       <TanStackRouterDevtools position='bottom-right' />
     </main>
   );

@@ -1,8 +1,9 @@
 import { formatAuctionDate } from '@/entities/auction';
 import type { AuctionDetailDto } from '@/shared/api/auctions';
+import { ParamField } from '@/shared/ui/ParamField.component';
 
 import type { Contact } from '../../types';
-import { Field, Section } from '../ui-kit.component';
+import { Section } from '../ui-kit.component';
 
 export function AuctionRouteSection({
   auction,
@@ -49,19 +50,19 @@ export function RoutePointRow({
 }) {
   return (
     <div className='grid gap-2 border-t pt-3 text-sm first:border-t-0 first:pt-0 sm:grid-cols-4'>
-      <Field
+      <ParamField
         label={`${point.sequence}. ${POINT_TYPE_LABEL[point.type]}`}
         value={`${point.city.name}${point.city.region ? `, ${point.city.region}` : ''}`}
       />
-      <Field
+      <ParamField
         label='Адрес'
         value={point.address ?? (contactsHidden ? 'скрыт' : '-')}
       />
-      <Field
+      <ParamField
         label='Дата'
         value={`${formatAuctionDate(point.date_from)} - ${formatAuctionDate(point.date_to)}`}
       />
-      <Field
+      <ParamField
         label='Контакты точки'
         value={
           contactsHidden

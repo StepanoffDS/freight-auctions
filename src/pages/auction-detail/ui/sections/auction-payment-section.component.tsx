@@ -1,6 +1,7 @@
 import type { AuctionDetailDto } from '@/shared/api/auctions';
+import { ParamField } from '@/shared/ui/ParamField.component';
 
-import { Field, Section } from '../ui-kit.component';
+import { Section } from '../ui-kit.component';
 
 const PAYMENT_TYPE_LABEL: Record<AuctionDetailDto['payment']['type'], string> =
   {
@@ -17,8 +18,11 @@ export function AuctionPaymentSection({
   return (
     <Section title='Оплата'>
       <div className='grid gap-3 text-sm sm:grid-cols-3'>
-        <Field label='Тип' value={PAYMENT_TYPE_LABEL[auction.payment.type]} />
-        <Field
+        <ParamField
+          label='Тип'
+          value={PAYMENT_TYPE_LABEL[auction.payment.type]}
+        />
+        <ParamField
           label='Отсрочка'
           value={
             auction.payment.delay_days == null
@@ -26,7 +30,7 @@ export function AuctionPaymentSection({
               : `${auction.payment.delay_days} дн.`
           }
         />
-        <Field label='Комментарий' value={auction.payment.note ?? '-'} />
+        <ParamField label='Комментарий' value={auction.payment.note ?? '-'} />
       </div>
     </Section>
   );

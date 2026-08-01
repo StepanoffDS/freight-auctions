@@ -1,7 +1,8 @@
 import { formatNumber } from '@/entities/auction/lib/format';
 import type { AuctionDetailDto } from '@/shared/api/auctions';
+import { ParamField } from '@/shared/ui/ParamField.component';
 
-import { Field, Section } from '../ui-kit.component';
+import { Section } from '../ui-kit.component';
 
 const BODY_TYPE_LABEL: Record<AuctionDetailDto['cargo']['body_type'], string> =
   {
@@ -29,50 +30,50 @@ export function AuctionCargoSection({
   return (
     <Section title='Груз и ТС'>
       <div className='grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4'>
-        <Field label='Груз' value={auction.cargo.name} />
-        <Field
+        <ParamField label='Груз' value={auction.cargo.name} />
+        <ParamField
           label='Вес'
           value={formatNumber(auction.cargo.weight_tons, 'т')}
         />
-        <Field
+        <ParamField
           label='Объем'
           value={formatNumber(auction.cargo.volume_m3, 'м3')}
         />
-        <Field
+        <ParamField
           label='Тип кузова'
           value={BODY_TYPE_LABEL[auction.cargo.body_type]}
         />
-        <Field label='Упаковка' value={auction.cargo.packaging ?? '-'} />
-        <Field
+        <ParamField label='Упаковка' value={auction.cargo.packaging ?? '-'} />
+        <ParamField
           label='Мест'
           value={auction.cargo.places_count?.toLocaleString('ru-RU') ?? '-'}
         />
-        <Field
+        <ParamField
           label='Температура'
           value={formatTemperature(
             auction.cargo.temperature_from,
             auction.cargo.temperature_to,
           )}
         />
-        <Field
+        <ParamField
           label='Опасный груз'
           value={auction.cargo.is_hazardous ? 'да' : 'нет'}
         />
-        <Field
+        <ParamField
           label='Кузов ТС'
           value={BODY_TYPE_LABEL[auction.vehicle_requirements.body_type]}
         />
-        <Field
+        <ParamField
           label='Тип загрузки'
           value={auction.vehicle_requirements.loading_type ?? '-'}
         />
-        <Field
+        <ParamField
           label='Количество ТС'
           value={auction.vehicle_requirements.vehicle_count.toLocaleString(
             'ru-RU',
           )}
         />
-        <Field
+        <ParamField
           label='Доп. требования'
           value={
             auction.vehicle_requirements.extra_requirements.length > 0

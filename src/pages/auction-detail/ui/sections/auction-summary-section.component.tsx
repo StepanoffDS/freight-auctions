@@ -1,17 +1,17 @@
-import { AUCTION_STATUS_LABEL, AUCTION_TYPE_LABEL } from '@/entities/auction';
 import {
+  AUCTION_STATUS_LABEL,
+  AUCTION_TYPE_LABEL,
+  BET_STATUS_LABEL,
   formatAuctionDate,
   formatMoney,
   formatNumber,
-} from '@/entities/auction/lib/format';
-import {
-  BET_STATUS_LABEL,
   USER_TRADING_STATUS_LABEL,
-} from '@/entities/auction/model/status';
+} from '@/entities/auction';
 import type { AuctionDetailDto } from '@/shared/api/auctions';
 import { Badge } from '@/shared/ui/kit/badge';
+import { ParamField } from '@/shared/ui/ParamField.component';
 
-import { Field, PrimaryAction, Section } from '../ui-kit.component';
+import { PrimaryAction, Section } from '../ui-kit.component';
 
 export function AuctionSummarySection({
   auction,
@@ -47,13 +47,13 @@ export function AuctionSummarySection({
       </div>
 
       <div className='grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4'>
-        <Field label='Организатор' value={auction.organizer.name} />
-        <Field label='ИНН' value={auction.organizer.inn ?? '-'} />
-        <Field
+        <ParamField label='Организатор' value={auction.organizer.name} />
+        <ParamField label='ИНН' value={auction.organizer.inn ?? '-'} />
+        <ParamField
           label='Дистанция'
           value={formatNumber(auction.route.distance_km, 'км')}
         />
-        <Field
+        <ParamField
           label='Моя ставка'
           value={
             auction.my_bet

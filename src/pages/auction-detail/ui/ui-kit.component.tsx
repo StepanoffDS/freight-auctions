@@ -6,6 +6,7 @@ import { ROUTES } from '@/shared/model/routes';
 import { Button } from '@/shared/ui/kit/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/kit/card';
 
+// TODO: refactor
 export function PrimaryAction({
   auction,
   auctionUuid,
@@ -52,17 +53,6 @@ export function Section({
       )}
       <CardContent className='grid gap-4'>{children}</CardContent>
     </Card>
-  );
-}
-
-export function Field({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className='min-w-0'>
-      <div className='text-xs font-medium uppercase text-muted-foreground'>
-        {label}
-      </div>
-      <div className='mt-1 break-words'>{value}</div>
-    </div>
   );
 }
 

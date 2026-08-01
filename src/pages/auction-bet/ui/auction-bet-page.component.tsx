@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, useParams } from '@tanstack/react-router';
+import { useParams } from '@tanstack/react-router';
 
+import { AuctionBetForm } from '@/features/set-auction-bet';
 import { auctionQueries } from '@/shared/api';
-import { ROUTES } from '@/shared/model/routes';
 
 export function AuctionBetPage() {
   const { auctionUuid } = useParams({ strict: false }) as {
@@ -13,47 +13,31 @@ export function AuctionBetPage() {
   );
 
   if (isPending) {
-    return <PageShell title='Ставка'>Загрузка формы...</PageShell>;
+    return (
+      <AuctionBetLayout title='Ставка'>Загрузка формы...</AuctionBetLayout>
+    );
   }
 
   if (isError) {
     return (
-      <PageShell title='Ставка'>
+      <AuctionBetLayout title='Ставка'>
         Не удалось загрузить: {error.message}
-      </PageShell>
+      </AuctionBetLayout>
     );
   }
 
   if (!data) {
-    return <PageShell title='Ставка'>Нет данных.</PageShell>;
+    return <AuctionBetLayout title='Ставка'>Нет данных.</AuctionBetLayout>;
   }
 
   return (
-    <PageShell title={`Ставка по ${data.cargo_num}`}>
-      <div className='rounded-md border bg-card p-4'>
-        <p className='text-sm text-muted-foreground'>
-          Доступность:{' '}
-          {data.trading.can_set_bet ? 'можно поставить' : 'недоступно'}
-        </p>
-        <p className='mt-3'>
-          Рекомендуемая цена:{' '}
-          {data.price.available_price == null
-            ? 'нет'
-            : `${data.price.available_price} ${data.price.currency}`}
-        </p>
-        <Link
-          to={ROUTES.AUCTION}
-          params={{ auctionUuid }}
-          className='mt-4 inline-block rounded-md border px-3 py-2 text-sm'
-        >
-          К карточке
-        </Link>
-      </div>
-    </PageShell>
+    <AuctionBetLayout title={`Ставка по ${data.cargo_num}`}>
+      <AuctionBetForm auction={data} />
+    </AuctionBetLayout>
   );
 }
 
-function PageShell({
+function AuctionBetLayout({
   children,
   title,
 }: {
