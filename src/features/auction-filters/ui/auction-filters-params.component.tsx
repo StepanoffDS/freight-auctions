@@ -1,9 +1,8 @@
-import {
-  AUCTION_STATUS_LABEL,
-  AUCTION_STATUSES,
-  AUCTION_TYPE_LABEL,
-} from '@/entities/auction';
+import { Controller, useFormContext } from 'react-hook-form';
 
+import { AUCTION_TYPE_LABEL } from '@/entities/auction';
+
+import { useAuctionFiltersContext } from '../model/auction-filters-context';
 import type { AuctionsSearchParams } from '../model/search-params';
 import { AUCTION_TYPES } from '../model/search-params';
 import { BooleanSelect } from './params/boolean-select.component';
@@ -13,96 +12,157 @@ import { NumberInput } from './params/number-input.component';
 import { SelectField } from './params/select-field.component';
 import { TextInput } from './params/text-input.component';
 
-const FILTER_INPUT_DEBOUNCE_MS = 500;
+export function AuctionFiltersParams() {
+  const { control } = useFormContext<AuctionsSearchParams>();
+  const { debouncedChange, onChange } = useAuctionFiltersContext();
 
-type AuctionFiltersParamsProps = {
-  value: AuctionsSearchParams;
-  onChange: (patch: Partial<AuctionsSearchParams>) => void;
-  resetKey: number;
-};
-
-export function AuctionFiltersParams({
-  onChange,
-  resetKey,
-  value,
-}: AuctionFiltersParamsProps) {
   return (
     <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-4'>
-      <TextInput
-        debounceMs={FILTER_INPUT_DEBOUNCE_MS}
-        key={`cargo-${resetKey}-${value.cargo_num ?? ''}`}
-        label='Номер заявки'
-        onChange={(cargo_num) => onChange({ cargo_num })}
-        value={value.cargo_num}
+      <Controller
+        control={control}
+        name='cargo_num'
+        render={({ field }) => (
+          <TextInput
+            label='Номер заявки'
+            onChange={(cargo_num) => {
+              field.onChange(cargo_num);
+              debouncedChange.changeCargoNum(cargo_num);
+            }}
+            value={field.value}
+          />
+        )}
       />
-      <SelectField
-        label='Статус'
-        onChange={(status) =>
-          onChange({
-            status: status as AuctionsSearchParams['status'],
-            statuses: [],
-          })
-        }
-        options={AUCTION_STATUSES.map((status) => ({
-          label: AUCTION_STATUS_LABEL[status],
-          value: status,
-        }))}
-        value={value.status}
+      <Controller
+        control={control}
+        name='auc_type'
+        render={({ field }) => (
+          <SelectField
+            label='Тип'
+            onChange={(auc_type) => {
+              const nextType = auc_type as AuctionsSearchParams['auc_type'];
+
+              field.onChange(nextType);
+              onChange({ auc_type: nextType });
+            }}
+            options={AUCTION_TYPES.map((type) => ({
+              label: AUCTION_TYPE_LABEL[type],
+              value: type,
+            }))}
+            value={field.value}
+          />
+        )}
       />
-      <SelectField
-        label='Тип'
-        onChange={(auc_type) =>
-          onChange({ auc_type: auc_type as AuctionsSearchParams['auc_type'] })
-        }
-        options={AUCTION_TYPES.map((type) => ({
-          label: AUCTION_TYPE_LABEL[type],
-          value: type,
-        }))}
-        value={value.auc_type}
+      <Controller
+        control={control}
+        name='load_city_uuid'
+        render={({ field }) => (
+          <CitySelect
+            label='Погрузка'
+            onChange={(load_city_uuid) => {
+              field.onChange(load_city_uuid);
+              onChange({ load_city_uuid });
+            }}
+            value={field.value}
+          />
+        )}
       />
-      <CitySelect
-        label='Погрузка'
-        onChange={(load_city_uuid) => onChange({ load_city_uuid })}
-        value={value.load_city_uuid}
+      <Controller
+        control={control}
+        name='unload_city_uuid'
+        render={({ field }) => (
+          <CitySelect
+            label='Выгрузка'
+            onChange={(unload_city_uuid) => {
+              field.onChange(unload_city_uuid);
+              onChange({ unload_city_uuid });
+            }}
+            value={field.value}
+          />
+        )}
       />
-      <CitySelect
-        label='Выгрузка'
-        onChange={(unload_city_uuid) => onChange({ unload_city_uuid })}
-        value={value.unload_city_uuid}
+      <Controller
+        control={control}
+        name='loading_date_from'
+        render={({ field }) => (
+          <DateInput
+            label='Погрузка от'
+            onChange={(loading_date_from) => {
+              field.onChange(loading_date_from);
+              onChange({ loading_date_from });
+            }}
+            value={field.value}
+          />
+        )}
       />
-      <DateInput
-        label='Погрузка от'
-        onChange={(loading_date_from) => onChange({ loading_date_from })}
-        value={value.loading_date_from}
+      <Controller
+        control={control}
+        name='loading_date_to'
+        render={({ field }) => (
+          <DateInput
+            label='Погрузка до'
+            onChange={(loading_date_to) => {
+              field.onChange(loading_date_to);
+              onChange({ loading_date_to });
+            }}
+            value={field.value}
+          />
+        )}
       />
-      <DateInput
-        label='Погрузка до'
-        onChange={(loading_date_to) => onChange({ loading_date_to })}
-        value={value.loading_date_to}
+      <Controller
+        control={control}
+        name='is_available'
+        render={({ field }) => (
+          <BooleanSelect
+            label='Доступность'
+            onChange={(is_available) => {
+              field.onChange(is_available);
+              onChange({ is_available });
+            }}
+            value={field.value}
+          />
+        )}
       />
-      <BooleanSelect
-        label='Доступность'
-        onChange={(is_available) => onChange({ is_available })}
-        value={value.is_available}
+      <Controller
+        control={control}
+        name='is_bidder'
+        render={({ field }) => (
+          <BooleanSelect
+            label='Моя ставка'
+            onChange={(is_bidder) => {
+              field.onChange(is_bidder);
+              onChange({ is_bidder });
+            }}
+            value={field.value}
+          />
+        )}
       />
-      <BooleanSelect
-        label='Моя ставка'
-        onChange={(is_bidder) => onChange({ is_bidder })}
-        value={value.is_bidder}
+      <Controller
+        control={control}
+        name='price_from'
+        render={({ field }) => (
+          <NumberInput
+            label='Цена от'
+            onChange={(price_from) => {
+              field.onChange(price_from);
+              debouncedChange.changePriceFrom(price_from);
+            }}
+            value={field.value}
+          />
+        )}
       />
-      <NumberInput
-        debounceMs={FILTER_INPUT_DEBOUNCE_MS}
-        key={`price-from-${resetKey}-${value.price_from ?? ''}`}
-        label='Цена от'
-        onChange={(price_from) => onChange({ price_from })}
-        value={value.price_from}
-      />
-      <NumberInput
-        debounceMs={FILTER_INPUT_DEBOUNCE_MS}
-        key={`price-to-${resetKey}-${value.price_to ?? ''}`}
-        label='Цена до'
-        onChange={(price_to) => onChange({ price_to })}
-        value={value.price_to}
+      <Controller
+        control={control}
+        name='price_to'
+        render={({ field }) => (
+          <NumberInput
+            label='Цена до'
+            onChange={(price_to) => {
+              field.onChange(price_to);
+              debouncedChange.changePriceTo(price_to);
+            }}
+            value={field.value}
+          />
+        )}
       />
     </div>
   );

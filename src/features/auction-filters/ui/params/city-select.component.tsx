@@ -1,4 +1,5 @@
 import { MOCK_CITIES } from '@/entities/city';
+
 import { SelectField } from './select-field.component';
 
 type CitySelectProps = {

@@ -1,5 +1,4 @@
 import type { ChangeEventHandler, FocusEventHandler, RefObject } from 'react';
-
 import { useRef, useState } from 'react';
 
 import { useRerender } from '../useRerender/useRerender';

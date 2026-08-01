@@ -1,5 +1,5 @@
-import type { ApiSchemas } from '../schema';
 import { MOCK_CITIES } from '../../model/mock-cities';
+import type { ApiSchemas } from '../schema';
 
 type AuctionDetail = ApiSchemas['AuctionDetail'];
 type AuctionListItem = ApiSchemas['AuctionListItem'];

@@ -59,7 +59,6 @@ export const auctionsSearchSchema = z.object({
   page: z.coerce.number().int().positive().catch(1),
   per_page: z.coerce.number().int().positive().max(50).catch(10),
   cargo_num: z.string().trim().optional().catch(undefined),
-  status: z.enum(AUCTION_STATUSES).optional().catch(undefined),
   statuses: statusesSchema,
   auc_type: z.enum(AUCTION_TYPES).optional().catch(undefined),
   load_city_uuid: z.uuid().optional().catch(undefined),
@@ -85,10 +84,6 @@ export function buildAuctionsListRequest(
 
   if (search.cargo_num) {
     filters.cargo_num = search.cargo_num;
-  }
-
-  if (search.status) {
-    filters.status = search.status;
   }
 
   if (search.statuses.length > 0) {

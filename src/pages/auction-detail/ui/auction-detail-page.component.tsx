@@ -1,5 +1,5 @@
-import { Link, useParams } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
+import { Link, useParams } from '@tanstack/react-router';
 
 import { auctionQueries } from '@/shared/api';
 import { DEFAULT_AUCTIONS_SEARCH } from '@/shared/model/auctions';

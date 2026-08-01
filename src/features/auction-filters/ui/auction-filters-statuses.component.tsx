@@ -1,30 +1,53 @@
+import { Controller, useFormContext } from 'react-hook-form';
+
 import { AUCTION_STATUS_LABEL, AUCTION_STATUSES } from '@/entities/auction';
 import { Checkbox } from '@/shared/ui/kit/checkbox';
 import { Field, FieldLabel } from '@/shared/ui/kit/field';
+
+import { useAuctionFiltersContext } from '../model/auction-filters-context';
 import type { AuctionsSearchParams } from '../model/search-params';
 
-type AuctionFiltersStatusesProps = {
-  value: AuctionsSearchParams;
-  onChange: (patch: Partial<AuctionsSearchParams>) => void;
-};
+export function AuctionFiltersStatuses() {
+  const { control } = useFormContext<AuctionsSearchParams>();
+  const { onChange } = useAuctionFiltersContext();
 
-export function AuctionFiltersStatuses({
+  return (
+    <Controller
+      control={control}
+      name='statuses'
+      render={({ field }) => (
+        <AuctionFiltersStatusesField
+          onChange={(nextStatuses) => {
+            field.onChange(nextStatuses);
+            onChange({ statuses: nextStatuses });
+          }}
+          statuses={field.value}
+        />
+      )}
+    />
+  );
+}
+
+function AuctionFiltersStatusesField({
   onChange,
-  value,
-}: AuctionFiltersStatusesProps) {
+  statuses,
+}: {
+  statuses: AuctionsSearchParams['statuses'];
+  onChange: (statuses: AuctionsSearchParams['statuses']) => void;
+}) {
   return (
     <fieldset className='grid gap-2 border-t pt-4'>
-      <legend className='text-sm font-medium '>Мультистатус</legend>
+      <legend className='text-sm font-medium '>Статус</legend>
       <div className='flex flex-wrap gap-2'>
         {AUCTION_STATUSES.map((status) => {
           const fieldId = `auction-status-${status}`;
-          const checked = value.statuses.includes(status);
+          const checked = statuses.includes(status);
           const setChecked = (nextChecked: boolean) => {
-            const statuses = nextChecked
-              ? [...value.statuses, status]
-              : value.statuses.filter((item) => item !== status);
+            const nextStatuses = nextChecked
+              ? [...statuses, status]
+              : statuses.filter((item) => item !== status);
 
-            onChange({ status: undefined, statuses });
+            onChange(nextStatuses);
           };
 
           return (

@@ -6,6 +6,7 @@ import type { AuctionListItemDto } from '@/shared/api';
 import { cn } from '@/shared/lib/css';
 import { ROUTES } from '@/shared/model/routes';
 import { Button } from '@/shared/ui/kit/button';
+
 import { formatDate, formatMoney, formatNumber } from '../lib/format';
 import {
   AUCTION_STATUS_LABEL,

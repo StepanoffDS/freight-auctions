@@ -52,9 +52,7 @@ export function AuctionsList() {
         <AuctionsListSkeleton />
       ) : isError ? (
         <AuctionsListError message={error.message} />
-      ) : !data ? (
-        <AuctionsListEmpty />
-      ) : data.items.length === 0 ? (
+      ) : !data || data.items.length === 0 ? (
         <AuctionsListEmpty />
       ) : (
         <>
