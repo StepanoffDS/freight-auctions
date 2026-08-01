@@ -1,77 +1,88 @@
-# React + TypeScript + Vite
+# Умная логистика: грузовые аукционы
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SPA для работы с грузовыми аукционами по OpenAPI-схеме `src/shared/api/schema/openapi.auctions.v0.json`.
 
-Currently, two official plugins are available:
+## Стек
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React, TypeScript, Vite
+- TanStack Router, TanStack Query
+- React Hook Form, Zod
+- MSW для мокового API
+- Zustand для точечного UI-state фильтров
+- Feature-Sliced Design
 
-## React Compiler
+## Запуск
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+yarn install
+yarn dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+После запуска открыть адрес из консоли Vite. Главная страница редиректит на `/auctions`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Команды
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+yarn dev        # локальная разработка с MSW
+yarn build      # typecheck + production build
+yarn lint       # ESLint
+yarn test       # Vitest
+yarn api:types  # обновить TS-типы из OpenAPI-схемы
 ```
+
+## Что реализовано
+
+- список аукционов с TanStack Query, пагинацией, skeleton/empty/error states;
+- фильтры в URL search params: номер груза, статусы, тип аукциона, города, даты, доступность, участие, цена;
+- безопасный парсинг search params через Zod с fallback-значениями;
+- prefetch детальной карточки по intent/hover;
+- детальная страница аукциона с ограничениями DTO, маршрутом, грузом, оплатой, контактами, ценами и торговым состоянием;
+- история ставок с участниками, рейтингом, НДС/без НДС, победителем, отменой и состоянием скрытой истории;
+- отдельный маршрут установки ставки `/auctions/$auctionUuid/bet`;
+- форма ставки на React Hook Form + Zod с проверкой `min/max/step`;
+- mutation `POST /auctions/{auctionUuid}/bets` с инвалидацией list/detail/bets queries;
+- MSW-store, который меняет текущую цену, статус пользователя, свою ставку и список ставок после mutation;
+- обработка ошибок API, включая `422 VALIDATION_ERROR`;
+- адаптивная верстка под desktop/mobile.
+
+## Архитектура
+
+Код разложен по FSD-слоям:
+
+- `src/app` — роутер, провайдеры, layout;
+- `src/pages` — страницы списка, деталей и ставки;
+- `src/widgets` — составной список аукционов;
+- `src/features` — фильтры, пагинация, установка ставки;
+- `src/entities` — карточка и форматирование аукциона;
+- `src/shared` — API-клиент, OpenAPI-типы, MSW-моки, UI-kit, общие модели.
+
+Имена React-компонентов оформлены с суффиксом `*.component.tsx`.
+
+## Проверка
+
+Проверялись сценарии:
+
+- открытие `/` и редирект на список аукционов;
+- загрузка списка через MSW;
+- фильтрация, пагинация и сохранение параметров в URL;
+- переход в детальную карточку;
+- отображение скрытых контактов, скрытой истории ставок и скрытой цены;
+- открытие формы ставки по ссылке;
+- клиентская валидация цены: обязательность, `> 0`, `min`, `max`, `step`;
+- успешная ставка с обновлением текущей цены, рейтинга, своей ставки и истории;
+- серверная ошибка `422` при невалидной ставке;
+- unit-тесты чистой логики.
+
+Минимальная автоматическая проверка:
+
+```bash
+yarn test
+yarn build
+```
+
+## Ограничения
+
+- Backend не реализован: в dev-режиме работает MSW, в production mock worker отключается.
+- Данные моковые и хранятся только в памяти вкладки браузера.
+- OpenAPI-схема используется как источник типов через `openapi-typescript`, но runtime-валидация всех DTO на границе API не добавлялась.
+- Карта маршрута не реализована, маршрут показан списком точек.
